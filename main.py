@@ -39,7 +39,10 @@ async def animation(screen, ball):
     current_time = 0
     while True:
         last_time, current_time = current_time, time.time()
-        await asyncio.sleep(1 / FPS - (current_time - last_time))  # tick
+        # call usually takes  a bit longer than ideal for framerate, so subtract from next wait
+        # sleeptime = 1/FPS - delayed = 1/FPS - (now-last-1/FPS)
+        # also limit max delay to avoid issues with asyncio.sleep() returning immediately for negative values
+        await asyncio.sleep(min(1 / FPS - (current_time - last_time - 1 / FPS), 1 / FPS))  # tick
         ball.move()
         screen.fill(black)
         ball.draw(screen)
